@@ -5,16 +5,16 @@ const formInp = document.getElementById("form-inp");
 const clear = document.getElementById("clear");
 
 const getList = () => JSON.parse(storage.getItem("taskList"));
-const setList = (arr) => storage.setItem("taskList", JSON.stringify(arr));
-const getTaskById = (id) => getList().filter((obj) => obj.id === id)[0];
-const updateTaskList = (newObj) => {
-  const newArr = getList().map((obj) => (obj.id === newObj.id ? newObj : obj));
-  setList(newArr);
+const setList = (taskList) => storage.setItem("taskList", JSON.stringify(taskList));
+const getTaskById = (id) => getList().filter((task) => task.id === id)[0];
+const updateTaskList = (newTask) => {
+  const newTaskList = getList().map((task) => (task.id === newTask.id ? newTask : task));
+  setList(newTaskList);
 };
 
 const deleteTask = (id) => {
-  const newArr = getList().filter((obj) => obj.id !== id);
-  setList(newArr);
+  const newTaskList = getList().filter((task) => task.id !== id);
+  setList(newTaskList);
 };
 
 const clearAll = () => {
@@ -28,26 +28,26 @@ const generateId = () => {
     .substring(2, 10 + 2);
 };
 
-const addTask = (obj) => {
+const addTask = (todo) => {
   const tasks = getList();
-  tasks.push(obj);
+  tasks.push(todo);
   setList(tasks);
-  const task = newTask(obj);
+  const task = newTask(todo);
   list.innerHTML += task;
 };
 
 const doneTask = (id) => {};
 
-const renderTasks = (arr) => {
-  arr.forEach((obj) => {
-    let task = newTask(obj);
+const renderTasks = (taskList) => {
+  taskList.forEach((todo) => {
+    let task = newTask(todo);
     list.innerHTML += task;
   });
 };
 
-const renderUpdatedTask = (oldItem, obj) => {
+const renderUpdatedTask = (oldItem, task) => {
   const tempContainer = document.createElement("div");
-  tempContainer.innerHTML = newTask(obj);
+  tempContainer.innerHTML = newTask(task);
   oldItem.style.display = "none";
   list.insertBefore(tempContainer.firstElementChild, oldItem);
   oldItem.remove();
@@ -58,11 +58,11 @@ const init = () => {
   list ? renderTasks(list) : setList([]);
 };
 
-const newTask = (obj) => {
-  const { text, done, editable, id } = obj;
-  const edit = '<div class="edit"></div>';
-  const save = '<div class="save"></div>';
-  const del = '<div class="delete"></div>';
+const newTask = (task) => {
+  const { text, done, editable, id } = task;
+  const edit = '<button type="button" class="edit"></button>';
+  const save = '<button type="button" class="save"></button>';
+  const del = '<button type="button" class="delete"></button>';
   let options = "";
 
   if (editable) {
@@ -72,9 +72,11 @@ const newTask = (obj) => {
   }
 
   const listItemTemplate = `
-    <li class="list-item ${editable && 'editable'} ${done && "done"}" data-id=${id}>
-        <div class="${done ? "checked" : "check"}"></div>
-        <div class="text" ${editable && "contentEditable=true"} >
+    <li class="list-item ${editable ? 'editable' : ''} ${done ? "done" : ''}" data-id=${id}>
+        <label class="${done ? "checked" : "check"}" >
+          <input type="checkbox" name="${id}" class="check-inp" checked="${done ? true : false}"/>
+        </label>
+        <div class="text" ${editable ? "contentEditable=true" : ''} >
         ${text}
         </div>
         <div class="options">
@@ -114,11 +116,11 @@ list.addEventListener("click", (e) => {
     target.classList.contains("checked")
   ) {
     const {id,listItem} = getPairIdItem(target);
-    const taskObj = getTaskById(id);
-    taskObj.done = !taskObj.done;
-    taskObj.editable = false;
-    updateTaskList(taskObj);
-    renderUpdatedTask(listItem, taskObj);
+    const task = getTaskById(id);
+    task.done = !task.done;
+    task.editable = false;
+    updateTaskList(task);
+    renderUpdatedTask(listItem, task);
     return;
   }
 
@@ -132,10 +134,10 @@ list.addEventListener("click", (e) => {
   if (target.classList.contains("edit")) {
     
     const {id,listItem} = getPairIdItem(target);
-    const taskObj = getTaskById(id);
-    taskObj.editable = !taskObj.editable;
-    updateTaskList(taskObj);
-    renderUpdatedTask(listItem, taskObj);
+    const task = getTaskById(id);
+    task.editable = !task.editable;
+    updateTaskList(task);
+    renderUpdatedTask(listItem, task);
 
     return;
   }
@@ -143,15 +145,15 @@ list.addEventListener("click", (e) => {
   if (target.classList.contains("save")) {
     const {id,listItem} = getPairIdItem(target);
     const text = listItem.querySelector(".text").innerText.trim();
-    const taskObj = getTaskById(id);
-    taskObj.editable = !taskObj.editable;
+    const task = getTaskById(id);
+    task.editable = !task.editable;
 
     if(text) {
-       taskObj.text = text;
+       task.text = text;
     }
 
-    updateTaskList(taskObj);
-    renderUpdatedTask(listItem, taskObj);
+    updateTaskList(task);
+    renderUpdatedTask(listItem, task);
 
     return;
   }

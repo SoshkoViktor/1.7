@@ -90,6 +90,9 @@
 
 }
 
+.check-inp {
+  display: none;
+}
 
 .check,
 .checked {
@@ -148,6 +151,7 @@
   flex-shrink: 0;
   margin-left: 10px;
   justify-self: flex-end;
+  border: none;
   &:hover {
     cursor: pointer;
   }
@@ -174,6 +178,8 @@
   height: 16px;
   position: relative;
   flex-shrink: 0;
+  border: none;
+  background: #fff;
   &::after {
     content: "";
     position: absolute;
